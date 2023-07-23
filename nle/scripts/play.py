@@ -11,7 +11,7 @@ import time
 import timeit
 import tty
 
-import gym
+import gymnasium as gym
 
 import nle  # noqa: F401
 from nle import nethack
@@ -92,6 +92,7 @@ def play():
             allow_all_yn_questions=True,
             allow_all_modes=True,
             wizard=FLAGS.wizard,
+            apply_api_compatibility=True
         )
         if FLAGS.seeds is not None:
             env.seed(FLAGS.seeds)

@@ -4,7 +4,7 @@ import queue
 import random
 import threading
 
-import gym
+import gymnasium as gym
 import pytest
 
 import nle  # noqa: F401
@@ -13,7 +13,7 @@ START_METHODS = [m for m in ("fork", "spawn") if m in mp.get_all_start_methods()
 
 
 def new_env_one_step():
-    env = gym.make("NetHackScore-v0")
+    env = gym.make("NetHackScore-v0", apply_api_compatibility=True)
     env.reset()
     obs, reward, done, _ = env.step(0)
     return done
@@ -42,7 +42,7 @@ ACTIONS = [0, 1, 2]
 
 class TestParallelEnvs:
     def test_two_nles(self):
-        envs = [gym.make("NetHackScore-v0") for _ in range(2)]
+        envs = [gym.make("NetHackScore-v0", apply_api_compatibility=True) for _ in range(2)]
 
         env, *queue = envs
         env.reset()
@@ -73,7 +73,7 @@ class TestParallelEnvs:
         for t in threads:
             t.start()
 
-        envs = [gym.make("NetHackScore-v0") for _ in range(num_envs)]
+        envs = [gym.make("NetHackScore-v0", apply_api_compatibility=True) for _ in range(num_envs)]
         for env in envs:
             resetqueue.put(env)
         env = readyqueue.get()

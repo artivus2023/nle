@@ -7,7 +7,7 @@ import random
 import sys
 import tempfile
 
-import gym
+import gymnasium as gym
 import numpy as np
 import pytest
 
@@ -98,13 +98,15 @@ class TestGymEnv:
 
     def test_reset(self, env_name, wizard):
         """Tests default initialization given standard env specs."""
-        env = gym.make(env_name, wizard=wizard)
+        env = gym.make(env_name, wizard=wizard, apply_api_compatibility=True, apply_api_compatibility=True)
         obs = env.reset()
         assert env.observation_space.contains(obs)
 
     def test_chars_colors_specials(self, env_name, wizard):
         env = gym.make(
-            env_name, observation_keys=("chars", "colors", "specials", "blstats")
+            env_name,
+            observation_keys=("chars", "colors", "specials", "blstats"),
+            apply_api_compatibility=True
         )
         obs = env.reset()
 
@@ -125,7 +127,7 @@ class TestGymEnv:
             assert "playmode:debug" in env.nethack.options
         else:
             # do not send a parameter to test a default
-            env = gym.make(env_name)
+            env = gym.make(env_name, apply_api_compatibility=True)
             assert "playmode:debug" not in env.nethack.options
 
 
@@ -143,6 +145,7 @@ class TestWizardMode:
             actions=actions,
             allow_all_yn_questions=True,
             allow_all_modes=True,
+            apply_api_compatibility=True
         )
         env.reset()
         env.step(actions.index(nethack.WizardCommand.WIZLEVELPORT))
@@ -159,7 +162,7 @@ class TestWizkit:
 
     def test_meatball_exists(self):
         """Test loading stuff via wizkit"""
-        env = gym.make("NetHack-v0", wizard=True)
+        env = gym.make("NetHack-v0", wizard=True, apply_api_compatibility=True)
         found = dict(meatball=0)
         obs = env.reset(wizkit_items=list(found.keys()))
         for line in obs["inv_strs"]:
@@ -173,13 +176,13 @@ class TestWizkit:
         del env
 
     def test_wizkit_no_wizard_mode(self):
-        env = gym.make("NetHack-v0", wizard=False)
+        env = gym.make("NetHack-v0", wizard=False, apply_api_compatibility=True)
         with pytest.raises(ValueError) as e_info:
             env.reset(wizkit_items=["meatball"])
         assert e_info.value.args[0] == "Set wizard=True to use the wizkit option."
 
     def test_wizkit_file(self):
-        env = gym.make("NetHack-v0", wizard=True)
+        env = gym.make("NetHack-v0", wizard=True, apply_api_compatibility=True)
         req_items = ["meatball", "apple"]
         env.reset(wizkit_items=req_items)
 
@@ -200,6 +203,7 @@ class TestBasicGymEnv:
                 "inv_letters",
                 "inv_oclasses",
             ),
+            apply_api_compatibility=True
         )
         obs = env.reset()
 
@@ -239,7 +243,7 @@ class TestGymEnvRollout:
     def test_rollout(self, env_name, rollout_len):
         """Tests rollout_len steps (or until termination) of random policy."""
         with tempfile.TemporaryDirectory() as savedir:
-            env = gym.make(env_name, save_ttyrec_every=1, savedir=savedir)
+            env = gym.make(env_name, save_ttyrec_every=1, savedir=savedir, apply_api_compatibility=True)
             rollout_env(env, rollout_len)
             env.close()
 
@@ -255,7 +259,7 @@ class TestGymEnvRollout:
 
     def test_rollout_no_archive(self, env_name, rollout_len):
         """Tests rollout_len steps (or until termination) of random policy."""
-        env = gym.make(env_name, savedir=None)
+        env = gym.make(env_name, savedir=None, apply_api_compatibility=True)
         assert env.savedir is None
         rollout_env(env, rollout_len)
 
@@ -266,8 +270,8 @@ class TestGymEnvRollout:
         if env_name.startswith("NetHackChallenge"):
             pytest.skip("Not running seed test on NetHackChallenge")
 
-        env0 = gym.make(env_name)
-        env1 = gym.make(env_name)
+        env0 = gym.make(env_name, apply_api_compatibility=True)
+        env1 = gym.make(env_name, apply_api_compatibility=True)
 
         seed_list0 = env0.seed()
         env0.reset()
@@ -284,8 +288,8 @@ class TestGymEnvRollout:
         if env_name.startswith("NetHackChallenge"):
             pytest.skip("Not running seed test on NetHackChallenge")
 
-        env0 = gym.make(env_name)
-        env1 = gym.make(env_name)
+        env0 = gym.make(env_name, apply_api_compatibility=True)
+        env1 = gym.make(env_name, apply_api_compatibility=True)
 
         env0.seed(123456, 789012)
         obs0 = env0.reset()
@@ -309,8 +313,8 @@ class TestGymEnvRollout:
         if env_name.startswith("NetHackChallenge"):
             pytest.skip("Not running seed test on NetHackChallenge")
 
-        env0 = gym.make(env_name)
-        env1 = gym.make(env_name)
+        env0 = gym.make(env_name, apply_api_compatibility=True)
+        env1 = gym.make(env_name, apply_api_compatibility=True)
 
         initial_seeds = (
             random.randrange(sys.maxsize),
@@ -331,7 +335,7 @@ class TestGymEnvRollout:
         compare_rollouts(env0, env1, rollout_len)
 
     def test_render_ansi(self, env_name, rollout_len):
-        env = gym.make(env_name)
+        env = gym.make(env_name, apply_api_compatibility=True)
         env.reset()
         for _ in range(rollout_len):
             action = env.action_space.sample()
@@ -354,7 +358,7 @@ class TestGymDynamics:
 
     @pytest.fixture
     def env(self):
-        e = gym.make("NetHackScore-v0")
+        e = gym.make("NetHackScore-v0", apply_api_compatibility=True)
         try:
             yield e
         finally:
@@ -400,7 +404,7 @@ class TestGymDynamics:
 
     def test_ttyrec_every(self):
         path = pathlib.Path(".")
-        env = gym.make("NetHackChallenge-v0", save_ttyrec_every=2, savedir=str(path))
+        env = gym.make("NetHackChallenge-v0", save_ttyrec_every=2, savedir=str(path), apply_api_compatibility=True)
         pid = os.getpid()
         for episode in range(10):
             env.reset()
@@ -431,10 +435,10 @@ class TestEnvMisc:
     @pytest.fixture
     def env(self):
         if sys.version_info < (3, 8):
-            e = gym.make("NetHackScore-v0")
+            e = gym.make("NetHackScore-v0", apply_api_compatibility=True)
         else:
             # gym 0.24+ doesnt like the shape of our observations.
-            e = gym.make("NetHackScore-v0")
+            e = gym.make("NetHackScore-v0", apply_api_compatibility=True)
         try:
             yield e
         finally:
@@ -447,7 +451,7 @@ class TestEnvMisc:
 
 class TestNetHackChallenge:
     def test_no_seed_setting(self):
-        env = gym.make("NetHackChallenge-v0")
+        env = gym.make("NetHackChallenge-v0", apply_api_compatibility=True)
         with pytest.raises(
             RuntimeError, match="NetHackChallenge doesn't allow seed changes"
         ):

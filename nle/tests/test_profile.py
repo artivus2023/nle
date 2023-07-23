@@ -7,7 +7,7 @@
 # to run
 import os
 
-import gym
+import gymnasium as gym
 import numpy as np
 import pytest
 
@@ -47,7 +47,7 @@ class TestProfile:
         if os.environ.get("CI") == "true":
             pytest.skip("Not running benchmark on CI")
 
-        env = gym.make("NetHack-v0", observation_keys=observation_keys)
+        env = gym.make("NetHack-v0", observation_keys=observation_keys, apply_api_compatibility=True)
         seeds = 123456
         steps = 1000
 
